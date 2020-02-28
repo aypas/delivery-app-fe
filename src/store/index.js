@@ -1,14 +1,26 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { authentication } from './modules/authentication'
+import { auth } from './modules/authentication'
 Vue.use(Vuex)
 
-export default new Vuex.Store({
-  
+const watchState = store => {
+  store.subscribe( (mutation, state) => {
+    console.log('hello', state, mutation);
+
+    if (mutation.type=="auth/setAuthUser" || mutation.type=="auth/refresh") {
+      localStorage.setItem("state", JSON.stringify(state.auth))
+    }
+  })
+}
+
+export const store = new Vuex.Store({
+
+  plugins: [watchState],
   modules: {
-
-    auth: authentication
-    
+    auth: auth   
   }
-
 })
+
+
+
+

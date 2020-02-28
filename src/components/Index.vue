@@ -4,6 +4,7 @@
       v-model="drawer"
       app
     >
+
       <v-list dense>
         
         <router-link to="home">
@@ -17,8 +18,8 @@
         </v-list-item>
         </router-link>
 
-        <div v-if="authUser.email && isAuthenticated">
-        <router-link to="/dashboard">
+        <div v-if="isAuthenticated">
+        <router-link to="dashboard">
         <v-list-item link v-bind:style= "[path=='/dashboard' ? {'background-color': '#BFBFBF'} : {}]">
           <v-list-item-action>
             <v-icon>mdi-desktop-mac-dashboard</v-icon>
@@ -30,16 +31,127 @@
         </router-link>
         </div>
 
+
+
+
+
+        <v-list-group
+          prepend-icon="mdi-navigation"
+        >
+
+          <template v-slot:activator>
+            <v-list-item-title>Quick Menu</v-list-item-title>
+          </template>
+
+
+          <!-- status -->
+          <v-list-group
+            no-action
+            sub-group
+            prepend-icon="mdi-check-network-outline"
+            disabled
+          >
+            <template v-slot:activator>
+              <v-list-item-content>
+                <v-list-item-title>Status</v-list-item-title>
+              </v-list-item-content>
+            </template>
+  
+            
+          </v-list-group>
+          <!-- status -->
+
+          <v-list-group
+            no-action
+            sub-group
+          >
+            <template v-slot:activator>
+              <v-list-item-content>
+                <v-list-item-title>Orders</v-list-item-title>
+              </v-list-item-content>
+            </template>
+  
+            <v-list-item
+              v-for="(admin, i) in orders"
+              :key="i"
+              link
+            >
+              <v-list-item-title v-text="admin[0]"></v-list-item-title>
+              <v-list-item-icon>
+                <v-icon v-text="admin[1]"></v-icon>
+              </v-list-item-icon>
+            </v-list-item>
+          </v-list-group>
+
+
+
+          <v-list-group
+            value="true"
+            no-action
+            sub-group
+          >
+            <template v-slot:activator>
+              <v-list-item-content>
+                <v-list-item-title>Earnings</v-list-item-title>
+              </v-list-item-content>
+            </template>
+  
+            <v-list-item
+              v-for="(admin, i) in earnings"
+              :key="i"
+              link
+            >
+              <v-list-item-title v-text="admin[0]"></v-list-item-title>
+              <v-list-item-icon>
+                <v-icon v-text="admin[1]"></v-icon>
+              </v-list-item-icon>
+            </v-list-item>
+          </v-list-group>
+
+
+
+
+
+          
+            <!-- manager's console... -->
+
+            <v-list-group
+              no-action
+              sub-group
+            >
+              <template v-slot:activator>
+                <v-list-item-content>
+                  <v-list-item-title>Manager Actions</v-list-item-title>
+                </v-list-item-content>
+              </template>
+    
+              <v-list-item
+                v-for="(admin, i) in manActions"
+                :key="i"
+                link
+              >
+                <v-list-item-title v-text="admin[0]"></v-list-item-title>
+                <v-list-item-icon>
+                  <v-icon v-text="admin[1]"></v-icon>
+                </v-list-item-icon>
+
+              </v-list-item>
+            </v-list-group>
+          </v-list-group>
+
+
         <div v-if="authUser.email && isAuthenticated">
-        <v-list-item link>
-          <v-list-item-action>
-            <v-icon>mdi-account</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>Account</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
+          <v-list-item link>
+            <v-list-item-action>
+              <v-icon>mdi-account</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Account</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
         </div>
+
+
 
         <div v-if="!isAuthenticated && authUser">
         <router-link to="/signin">
@@ -55,6 +167,8 @@
         </div>
 
 
+
+
         <v-list-item link>
           <v-list-item-action>
             <v-icon>mdi-contact-mail</v-icon>
@@ -64,7 +178,21 @@
           </v-list-item-content>
         </v-list-item>
       
+
+
+      
+
       </v-list>
+
+
+      <template v-slot:append>
+        <div class="pa-2" v-if="isAuthenticated">
+          <v-btn block color="indigo" class="white--text" @click="logout">Logout</v-btn>
+        </div>
+      </template>
+
+
+
     </v-navigation-drawer>
 
     <v-app-bar
@@ -97,9 +225,6 @@
                 <keep-alive>
                   <router-view></router-view>
                 </keep-alive>
-                <p> ist {{isAuthenticated}}</p>
-                <p>ff{{authUser}}</p>
-                <p>fe{{localStorage}}</p>
 
               </template>
               <span>Codepen</span>
@@ -125,29 +250,41 @@ export default {
   name: 'Index',
 
   data: () => ({
-    drawer: false
+    quickSelect: null,
+    drawer: false,
+    orders: [
+              ['Pending', 'mdi-arrow-decision'], 
+              ['Current', 'mdi-account-clock'], 
+              ['Completed', 'mdi-check']
+            ],
+    earnings: [['Daily', 'mdi-calendar-today'], ['Custom Period', 'mdi-calendar-month-outline']],
+    manActions: [['Shift', ''], ['Orders', ''], ['Track', 'mdi-binoculars'], ['Node']]
   }),
   
-  computed: {
+  computed: {  
     path(){
       return this.$route.path;
     },
 
     isAuthenticated() {
-      console.log(this.$store.state.auth.isAuthenticated, 'wtffffff')
       return this.$store.state.auth.isAuthenticated;
     },
 
     authUser() {
-      return this.$store.state.auth.authUser
-    },
+      return this.$store.state.auth;
+    }
+  },
 
-    localStorage() {
-      return this.$store.state.auth.jwt===true
+  methods: {
+    logout() {
+      console.log('logout')
+      this.$store.commit('auth/removeAllCreds');
+      this.$router.push('home')
     }
   },
 
   watch: {
+    //delete this
     drawer(){
       console.log(this.$route.path)
       return null

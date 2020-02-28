@@ -2,21 +2,17 @@
 	<div class="fff">
 	<v-app>
 		<div id="container">
-
 			<v-container>
 				<p class="mt-4 display-3 indigo--text mb-12">Sign In</p>
-
-
 				<v-form class="mx-auto">
 					<v-text-field
-								v-model="email"
+								v-model="json.email"
 								class="mb-4"
 	              label="Email"
 	              outlined
 	        ></v-text-field>
-
 	  			<v-text-field
-	  				v-model="password"
+	  				v-model="json.password"
 	        	label="Password"
 	        	outlined
 	        	type="password"
@@ -30,7 +26,6 @@
 				<v-btn x-large rounded ripple elevation="4" color="indigo" class="white--text" @click="post">Sign In</v-btn>
 			</v-container>
 		</div>	
-		<!-- {{t}} -->
 	</v-app>
 	</div>
 
@@ -39,14 +34,15 @@
 
 
 <script>
-import { axiosIns } from '../plugins/Axios.js'
 export default {
 	name: 'SignIn',
 
 	data(){
 		return {
-			email: null,
-			password: null,
+			json: {
+				email: null,
+				password: null
+			},
 			data: null,
 			err: null,
 			errDetail: null
@@ -56,36 +52,19 @@ export default {
 	methods: {
 		
 		post(){
+			console.log(this.json)
 			if (this.validateInput()){
 				return null
 			}
-			axiosIns.post('/api/auth/token/', {email: this.email, password: this.password}
-			).then( (response) => {
-				this.$store.dispatch('login', response.data);
-				return true;
-			}).catch( (err) => {
-				console.log(err)
-				this.err = err.response.status
-				this.errDetail = err.response.data.detail
-				return false
-			}).then( (obj) => {
-				if (obj) {
-					axiosIns.get('api/auth/user/')
-						.then( (response) => {
-							this.$store.dispatch('setUserData', response.data)
-						})
-						.catch( (err) => {
-							console.log(err, 'big error')
-						})
-				}
-			})
+			console.log('i work')
+			this.$store.dispatch('auth/login', this.json);
 		},
 
 		validateInput(){
-			if (!this.email | !this.password){
+			if (!this.json.email | !this.json.password){
 				this.err = 400
 				return true
-			} else if (!this.validateEmail(this.email)){
+			} else if (!this.validateEmail(this.json.email)){
 				this.err = 400
 				return true
 			}
@@ -97,7 +76,6 @@ export default {
 		}
 	}
 }
-
 </script>
 
 

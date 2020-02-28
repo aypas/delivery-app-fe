@@ -1,63 +1,144 @@
-import Vue from 'vue'
+import { axiosIns } from "@/plugins/Axios"
+//import Vue from 'vue'
 
-export const authentication = {
-  state: {
 
-    authUser: {},
-    isAuthenticated: false,
-    jwt: localStorage.getItem('token'),
-    refreshToken: localStorage.getItem('refresh')
-    
+const initialState = {
+  authUser: {
+
+    id: 0,
+    is_active: null,
+    email: '',
+    name: '',
+    created: '',
+    is_node_owner: null,
+    status: '',
+    on_shift: null,
+    is_manager: null
+  },
+  isAuthenticated: false,
+  jwt: '',
+  refreshToken: '',
+  num: 0
+}
+
+const state = Object.assign({}, initialState)
+
+const getters = {
+  //all getters are collected at the root level, and added into state
+  getAuthUser(state) {
+    return state.authUser;
   },
 
-  mutations: {
+  getIsAuthenticated(state) {
+    return state.isAuthenticated;
+  },
 
-    setAuthUser(state, authUser) {
-      Vue.set(state, 'authUser', authUser);
-      Vue.set(state, 'isAuthenticated', true)
-      console.log('pls make true', state.isAuthenticated)
-    },
+  getJWT(state) {
+    return state.jwt;
+  },
 
-    updateToken(state, newToken) {
-      console.log('dispatched', newToken)
-      if (newToken.hasOwnProperty('refresh')){
-        localStorage.setItem('token', newToken.access);
-        localStorage.setItem('refresh', newToken.refresh);
-        Vue.set(state, 'jwt', newToken.access);
-        Vue.set(state, 'refresh', newToken.refresh);
-        console.log('login');
-      } else {
-        console.log('update tokens commiting...');
-        localStorage.setItem('token', newToken.access);
-        Vue.set(state, 'jwt', newToken.access);
+  getRefresh(state) {
+    return state.refreshToken;
+  },
+
+  getNum(state){
+    return state.num;
+  }
+}
+
+const mutations = {
+
+    initializeStore(state){
+      console.log('kaka', state)
+      if (localStorage.getItem('state')) {
+
+        
+        Object.assign(state, JSON.parse(localStorage.getItem('state')))
+          
+        state.isAuthenticated=true;
       }
     },
 
+    setAuthUser(state, authUser) {
+      console.log(state, authUser)
+      console.log('pls make true', state.isAuthenticated)
+      state.authUser =  {...authUser};
+      state.isAuthenticated = true;
+      console.log(!!authUser)
 
-    removeToken(state){
-      localStorage.removeItem('token');
-      localStorage.removeItem('refresh');
-      Vue.set(state, 'jwt', null);
-      Vue.set(state, 'refresh', null); 
+
+    },
+
+    add(state) {
+      state.num++
+    },
+
+    addTokens(state, token) {
+      console.log('addTokens..',token.token, state)
+      state.jwt = token.token.access;
+      state.refreshToken = token.token.refresh;
+
+    },
+
+    refresh(state, newToken) {
+      console.log(state, newToken)
+      if (newToken.hasOwnProperty('access')) {
+        state.jwt = newToken.access;
+        console.log('has')
+      } else if (newToken.hasProperty('refresh')) {
+        console.log('sheeeeeeit')
+      }
+    },
+
+    removeAllCreds(state){
+      //localStorage.removeItem('state');
+      console.log(state)
+      for (let prop in state) {
+        state[prop] = initialState[prop]
+      }
+      
+      localStorage.removeItem('state')
+
     }
-    
-  },
+
+  }
   
-  actions: {
+const actions = {
 
-    login(context, token) {
-      console.log('pls print', token.access);
-      this.commit('updateToken', token);
-    },
+  login({commit}, payload) {
 
-    setUserData(context, userData) {
-      console.log('dispatched userdata');
-      this.commit('setAuthUser', userData);
-    },
+    console.log('i work', commit, payload.password)
 
-    logout(context) {
-      context.commit('removeToken')
-    }
+    axiosIns.post('/api/auth/token/', {email: payload.email, password: payload.password}
+      ).then( (response) => {
+        commit('addTokens', {token:response.data});
+        return true;
+      }).catch( (err) => {
+        console.log(err, 'errrr?')
+        this.err = err.response.status
+        this.errDetail = err.response.data.detail
+        return false
+      }).then( (obj) => {
+        if (obj) {
+          axiosIns.get('api/auth/user/')
+            .then( (response) => {
+              commit('setAuthUser', response.data);
+            })
+            .catch( (err) => {
+              console.log(err, 'big error')
+            })
+        }
+      })
+  }
 
-  },
+}
+
+
+
+export const auth = {
+  namespaced: true,
+  state,
+  getters,
+  actions,
+  mutations
 }
