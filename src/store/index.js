@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import { auth } from './modules/authentication'
+import { orders } from './modules/orders'
+
 Vue.use(Vuex)
 
 const watchState = store => {
@@ -17,7 +19,8 @@ export const store = new Vuex.Store({
 
   plugins: [watchState],
   modules: {
-    auth: auth   
+    auth: auth,
+    orders: orders   
   }
 })
 

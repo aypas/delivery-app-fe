@@ -58,6 +58,7 @@ export default {
 			}
 			console.log('i work')
 			this.$store.dispatch('auth/login', this.json);
+			this.$router.push('dashboard')
 		},
 
 		validateInput(){
