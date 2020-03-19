@@ -109,8 +109,8 @@ const actions = {
 
     console.log('i work', commit, payload.password)
 
-    axiosIns.post('/api/auth/token/', {email: payload.email, password: payload.password}
-      ).then( (response) => {
+    axiosIns.post('/api/auth/token/', {email: payload.email, password: payload.password})
+      .then( (response) => {
         commit('addTokens', {token:response.data});
         return true;
       }).catch( (err) => {
@@ -128,6 +128,17 @@ const actions = {
               console.log(err, 'big error')
             })
         }
+      })
+  },
+
+  signUp({commit}, payload) {
+    console.log(payload)
+    axiosIns.post('/api/auth/signup/', {payload})
+      .then( (response) => {
+        console.log(response, `${commit}`)
+      })
+      .catch( (err) => {
+        console.log('you done fucked up', err)
       })
   }
 
