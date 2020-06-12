@@ -41,6 +41,10 @@ export default {
   	add(){
   		this.$store.commit('auth/add');
   	}
+  },
+
+  mounted() {
+    console.log(this.$store.state.auth.isAuthenticated, 'rag')
   }
 }
 </script>

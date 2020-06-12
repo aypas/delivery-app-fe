@@ -1,13 +1,13 @@
 <template>
 <div>
-	{{yourNode}}
+	<v-btn @click="oauth">kaka</v-btn>
 </div>
 </template>
 
 
 
 <script>
-import { axiosIns } from '../plugins/Axios.js';
+//import { axiosIns } from '../plugins/Axios.js';
 
 export default {
 	data() {
@@ -16,26 +16,9 @@ export default {
 		}
 	},
 
-	mounted() {
-		this.mountedMethod()
-	},
-
 	methods: {
-		mountedMethod(c=0) {
-			console.log(c);
-			c++;
-			axiosIns.get('api/core/node/')
-				.then( (response) => {
-				  this.yourNode = response.data;
-				  return true;
-				}).catch( (err) => {
-					console.log(err.response.status);
-					return err.response.status;
-				}).then( (obj) => {
-					if (!obj && this.$state.auth.jwt && c<3) {
-						this.mountedMethod(c);
-					}
-				});
+		oauth() {
+			this.$store.dispatch('auth/oauth')
 		}
 	}
 }

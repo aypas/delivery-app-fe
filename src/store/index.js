@@ -7,8 +7,6 @@ Vue.use(Vuex)
 
 const watchState = store => {
   store.subscribe( (mutation, state) => {
-    console.log('hello', state, mutation);
-
     if (mutation.type=="auth/setAuthUser" || mutation.type=="auth/refresh") {
       localStorage.setItem("state", JSON.stringify(state.auth))
     }

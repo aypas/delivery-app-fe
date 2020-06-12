@@ -126,13 +126,14 @@
               </template>
     
               <v-list-item
-                v-for="(admin, i) in manActions"
+                v-for="(item, i) in manActions"
                 :key="i"
                 link
+                :to="item.link"
               >
-                <v-list-item-title v-text="admin[0]"></v-list-item-title>
+                <v-list-item-title>{{item.text}}</v-list-item-title>
                 <v-list-item-icon>
-                  <v-icon v-text="admin[1]"></v-icon>
+                  <v-icon v-text="item.icon"></v-icon>
                 </v-list-item-icon>
 
               </v-list-item>
@@ -258,7 +259,7 @@ export default {
               ['Completed', 'mdi-check']
             ],
     earnings: [['Daily', 'mdi-calendar-today'], ['Custom Period', 'mdi-calendar-month-outline']],
-    manActions: [['Shift', ''], ['Orders', ''], ['Track', 'mdi-binoculars'], ['Node']]
+    manActions: [{text: 'Settings', icon: '', link: '/settings'}, {text:'Node',icon:'', link:'/node'}]
   }),
   
   computed: {  
@@ -278,8 +279,8 @@ export default {
   methods: {
     logout() {
       console.log('logout')
-      this.$store.commit('auth/removeAllCreds');
       this.$router.push('home')
+      this.$store.commit('auth/removeAllCreds')
     }
   },
 

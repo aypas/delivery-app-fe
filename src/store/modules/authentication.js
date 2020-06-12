@@ -1,5 +1,5 @@
 import { axiosIns } from "@/plugins/Axios"
-//import Vue from 'vue'
+import router from "@/router/index"
 
 
 const initialState = {
@@ -18,7 +18,7 @@ const initialState = {
   isAuthenticated: false,
   jwt: '',
   refreshToken: '',
-  num: 0
+  loginErr: ''
 }
 
 const state = Object.assign({}, initialState)
@@ -54,7 +54,7 @@ const mutations = {
 
         
         Object.assign(state, JSON.parse(localStorage.getItem('state')))
-          
+        console.log(state)
         state.isAuthenticated=true;
       }
     },
@@ -99,6 +99,14 @@ const mutations = {
       
       localStorage.removeItem('state')
 
+    },
+
+    loginErr(state, deleteErr) {
+      if (deleteErr) {
+        state.loginErr = ""
+      } else {
+        state.loginErr = "An account with the given credentials does not exist."
+      }
     }
 
   }
@@ -106,32 +114,31 @@ const mutations = {
 const actions = {
 
   login({commit}, payload) {
-
-    console.log('i work', commit, payload.password)
-
     axiosIns.post('/api/auth/token/', {email: payload.email, password: payload.password})
       .then( (response) => {
         commit('addTokens', {token:response.data});
         return true;
       }).catch( (err) => {
-        console.log(err, 'errrr?')
-        this.err = err.response.status
-        this.errDetail = err.response.data.detail
+        commit('loginErr')
+        console.log(err)
         return false
       }).then( (obj) => {
         if (obj) {
           axiosIns.get('api/auth/user/')
             .then( (response) => {
               commit('setAuthUser', response.data);
+              router.push('/dashboard')
             })
             .catch( (err) => {
               console.log(err, 'big error')
-            })
+              commit('loginErr', true)
+            })       
         }
       })
   },
 
   signUp({commit}, payload) {
+    //lotsa work to be done here as it relates to navigation guard!!!!!
     console.log(payload)
     axiosIns.post('/api/auth/signup/', {payload})
       .then( (response) => {
@@ -140,11 +147,16 @@ const actions = {
       .catch( (err) => {
         console.log('you done fucked up', err)
       })
+  },
+
+  oauth() {
+    axiosIns.get('api/auth/oauth/')
+      .then( response => {
+        window.location.href = response.data.url
+      })
   }
 
 }
-
-
 
 export const auth = {
   namespaced: true,

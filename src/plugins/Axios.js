@@ -31,7 +31,8 @@ axiosIns.interceptors.response.use(function (response) {
           }
           if (error.response.status==401){
             store.commit('auth/removeAllCreds');
-            router.push('home?q=logout');
+            console.log('if navigation guard doesnt fail here it might be good in general!!!')
+            router.push('/?q=SesionExpired');
           }
           return false;
       })

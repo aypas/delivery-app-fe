@@ -4,6 +4,7 @@
 		<div id="container">
 			<v-container>
 				<p class="mt-4 display-3 indigo--text mb-12">Sign In</p>
+
 				<v-form class="mx-auto">
 					<v-text-field
 								v-model="json.email"
@@ -19,9 +20,10 @@
 	        ></v-text-field>
 				</v-form>
 							<div>
-				<p v-if="!err" class="caption">Forgot My Password</p>
-				<p class="caption" v-else-if="err==400">You left one of the two fields empty</p>
-				<p class="caption" v-else-if="err==401">{{errDetail}}</p>
+				<p class="caption">Forgot My Password</p>
+				<p class="caption" v-if="err==400">You left one of the two fields empty</p>
+				<p class="caption" v-else-if="err!=400 && !loginFail">.</p>
+				<p class="caption" v-else-if="loginFail">{{loginFail}}</p>
 				</div>
 				<v-btn x-large rounded ripple elevation="4" color="indigo" class="white--text" @click="post">Sign In</v-btn>
 			</v-container>
@@ -49,6 +51,12 @@ export default {
 		}
 	},
 
+	computed: {
+		loginFail() {
+			return this.$store.state.auth.loginErr
+		}
+	},
+
 	methods: {
 		
 		post(){
@@ -56,9 +64,7 @@ export default {
 			if (this.validateInput()){
 				return null
 			}
-			console.log('i work')
-			this.$store.dispatch('auth/login', this.json);
-			this.$router.push('dashboard')
+			this.$store.dispatch('auth/login', this.json)
 		},
 
 		validateInput(){
