@@ -154,6 +154,17 @@ const actions = {
       .then( response => {
         window.location.href = response.data.url
       })
+  },
+
+  getAccess({commit},{path}) {
+    console.log(commit, path, 'kakaakakaka')
+    axiosIns.get('api/auth/realcallback/'+path)
+      .then( response => {
+        console.log(response.status)
+      })
+      .catch( err => {
+        console.log(err)
+      })
   }
 
 }

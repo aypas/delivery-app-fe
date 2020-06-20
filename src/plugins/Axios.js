@@ -10,7 +10,7 @@ axios.defaults.headers.common['Content-Type'] = "application/json";
 
 //also, i gotta add a bunch of code to all catches to handle timeout errs
 export const axiosIns = axios.create({
-  baseURL: "http://api.a-delivery.tk",
+  baseURL: "http://127.0.0.1:8000",
   timeout: 1750
 });
 
