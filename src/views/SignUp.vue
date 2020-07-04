@@ -10,6 +10,7 @@
 						<v-list-item-subtitle class="text-center">Full Name</v-list-item-subtitle>
 						<v-list-item-subtitle class="text-center">Minimum 8 character password</v-list-item-subtitle>
 						<v-list-item-subtitle class="text-center">Valid 6 digit employer given code</v-list-item-subtitle>
+						<p class="mt-10 pt-10 red--text text--lighten-1">{{authErr}}</p>
 					</v-list-item-content>
 				</v-list-item>
 			</v-col>
@@ -34,6 +35,14 @@
 					label="E-mail"
 					:rules="emailRules"
 					required
+					>
+				</v-text-field>
+
+				<v-text-field
+					v-model.lazy="password"
+					:rules="passwordRules"
+					label="Password"
+					type="password"
 					>
 				</v-text-field>
 
@@ -66,12 +75,21 @@ export default {
 			name: '',
 			email: '',
 			code: '',
+			password: '',
 			lazy: true,
 			nameRules: [],
 			emailRules: [],
-			codeRules: []
+			codeRules: [],
+			passwordRules: []
 		}
 	},
+
+	computed: {
+		authErr() {
+			return this.$store.state.auth.authErr
+		}
+	},
+	
 	methods: {
 		validate() {
 
@@ -89,12 +107,17 @@ export default {
 				v => (v >= 100000 && v <= 999999) || 'Invalid Code, must be 6 digits, cannot start with a 0',
 			]
 
+			this.passwordRules = [
+				v => !!v || "password is required",
+				v => v.length>=8 || 'Password must be at least 8 characters long'
+			]
+
 			//console.log(this.$refs.form.validate())
 			let self = this
 			setTimeout( function() {
 				if (self.$refs.form.validate()) {
 					console.log(typeof self.code)
-					self.$store.dispatch('auth/signUp', {name: self.name, email: self.email, code: self.code})
+					self.$store.dispatch('auth/signUp', {name: self.name, email: self.email, code: self.code, password: self.password})
 				} else {
 					console.log("invalid")
 				}

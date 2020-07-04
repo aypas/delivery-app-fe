@@ -1,13 +1,13 @@
 import { axiosIns } from "@/plugins/Axios"
 
 const state = {
-  data: [],
-  lastUpdated: ''
+  orderData: [],
+  lastUpdated: {}
 }
 
 const getters = {
-  getData(state) {
-    return state.data
+  getOrderData(state) {
+    return state.orderData
   },
 
   getLastUpdated(state) {

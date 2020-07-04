@@ -13,12 +13,15 @@ const initialState = {
     is_node_owner: null,
     status: '',
     on_shift: null,
-    is_manager: null
+    is_manager: null,
+    of_node: []
   },
+  mainNode: null,
   isAuthenticated: false,
   jwt: '',
   refreshToken: '',
-  loginErr: ''
+  authErr: '',
+  oauthMsg: ''
 }
 
 const state = Object.assign({}, initialState)
@@ -27,6 +30,18 @@ const getters = {
   //all getters are collected at the root level, and added into state
   getAuthUser(state) {
     return state.authUser;
+  },
+
+  getNodes(state){
+    return state.authUser.of_node
+  },
+
+  selectedNodeOrDefault(state) {
+    console.log(state.mainNode, state.authUser.of_node[0], '?')
+    if (state.mainNode == null) {
+      return state.authUser.of_node.length != 0 ? state.authUser.of_node[0] : null
+    }
+    return state.mainNode
   },
 
   getIsAuthenticated(state) {
@@ -40,20 +55,15 @@ const getters = {
   getRefresh(state) {
     return state.refreshToken;
   },
-
-  getNum(state){
-    return state.num;
-  }
 }
 
 const mutations = {
 
     initializeStore(state){
       console.log('kaka', state)
-      if (localStorage.getItem('state')) {
-
-        
-        Object.assign(state, JSON.parse(localStorage.getItem('state')))
+      if (localStorage.getItem('state')) { 
+        let authObj = JSON.parse(localStorage.getItem('state'))       
+        Object.assign(state, authObj)
         console.log(state)
         state.isAuthenticated=true;
       }
@@ -67,10 +77,6 @@ const mutations = {
       console.log(!!authUser)
 
 
-    },
-
-    add(state) {
-      state.num++
     },
 
     addTokens(state, token) {
@@ -98,17 +104,29 @@ const mutations = {
       }
       
       localStorage.removeItem('state')
+      router.push('/')
 
     },
 
-    loginErr(state, deleteErr) {
+    authErr(state, {err, deleteErr}) {
       if (deleteErr) {
-        state.loginErr = ""
+        state.authErr = ""
       } else {
-        state.loginErr = "An account with the given credentials does not exist."
+        state.authErr = err
       }
-    }
+    },
 
+    oauth(state, status) {
+      if (status) {
+        state.oauthMsg = 'You\'ve succesfully linked your google account to our servers!'
+      } else {
+        state.oauthMsg = 'there was a problem'
+      }
+    },
+
+    setMainNode(state, mainNode) {
+      state.mainNode = mainNode;
+    }
   }
   
 const actions = {
@@ -119,7 +137,7 @@ const actions = {
         commit('addTokens', {token:response.data});
         return true;
       }).catch( (err) => {
-        commit('loginErr')
+        commit('authErr', {err: err.response.data.detail})
         console.log(err)
         return false
       }).then( (obj) => {
@@ -131,7 +149,7 @@ const actions = {
             })
             .catch( (err) => {
               console.log(err, 'big error')
-              commit('loginErr', true)
+              commit('authErr', {deleteErr: true})
             })       
         }
       })
@@ -140,12 +158,26 @@ const actions = {
   signUp({commit}, payload) {
     //lotsa work to be done here as it relates to navigation guard!!!!!
     console.log(payload)
-    axiosIns.post('/api/auth/signup/', {payload})
+    axiosIns.post('/api/auth/signup/', payload)
       .then( (response) => {
-        console.log(response, `${commit}`)
+        commit('setAuthUser', response.data)
+        return response.data
       })
       .catch( (err) => {
-        console.log('you done fucked up', err)
+        console.log('you done fucked up', err.response.data.detail)
+        commit('authErr', {err:err.response.data.detail})
+        return false
+      }).then( (data) => {
+        if (!data) {
+          console.log('didnt work')
+        } else {
+          axiosIns.post('api/auth/token/', {email: data.email, password: data.password})
+            .then( (response) => {
+              commit('addTokens', {token: response.data})
+            }).catch((err) => {
+              console.log('bad fucking fail m8', err)
+            })
+        }
       })
   },
 
@@ -158,12 +190,21 @@ const actions = {
 
   getAccess({commit},{path}) {
     console.log(commit, path, 'kakaakakaka')
-    axiosIns.get('api/auth/realcallback/'+path)
+    axiosIns.get('api/auth/callback/'+path)
       .then( response => {
+        if (response.status == 200){
+          commit('auth/oauth', true)
+          return true
+        }
         console.log(response.status)
       })
       .catch( err => {
+        commit('auth/oauth', false)
         console.log(err)
+      })
+      .then( () => {
+        console.log('third chain')
+        router.push('/node')
       })
   }
 

@@ -1,12 +1,21 @@
 <template>
-  <div class="home">
-    <p>{{num}}</p>
-    <p>{{j}}</p>
+  <v-container>
+    <v-row 
+      :justify="'space-around'"
+      >
 
-    <p> ist {{isAuthenticated}}</p>
-    <p>ff{{authUser}}f</p>
-    <button @click="add">add</button>
-  </div>
+      <v-col cols="12">
+        <v-row>
+          <p class="text-left">This site is still under construction and as a result absolutley riddled with bugs. 
+              Please report any that you see to the guy who built it so that it can be fixed faster.</p>
+
+        </v-row>
+        <v-row><p>If you come across a bug that makes you unable to use the app, refresh the page until it works...</p></v-row>
+        <v-row><p>Most of them will be fixed eventually.</p></v-row>
+        <v-row><p>To learn about what the application is and how to use the application click <router-link :to="'about'">here</router-link></p></v-row>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>

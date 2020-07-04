@@ -35,14 +35,19 @@
 
 						<v-card-text>
 							<v-data-table
-								:items="data"
-								:item-key="data.id"
+								:items="orderData"
+								:item-key="orderData.id"
 								:headers="headers"
 								:items-per-page="10"
+								
 							>
 								<template v-slot:item.deliver_by="{ item }">
 									<span>{{new Date(item.deliver_by).toLocaleTimeString().slice(0,4)}}</span>
 								</template>	
+
+								<template v-slot:footer>
+									<div class="foot"></div>
+								</template>
 							
 							</v-data-table>
 
@@ -57,7 +62,7 @@
 
 
 				{{lastUpdated}}
-		<div v-for="(data, index) in data" v-bind:key="index">
+		<div v-for="(data, index) in orderData" v-bind:key="index">
 			<p>{{data}}</p>
 		</div>
 
@@ -88,9 +93,8 @@ export default {
 	},
 
 	computed: {
-		data() {
-			console.log(this.$store.state.orders.data)
-			return this.$store.state.orders.data
+		orderData() {
+			return this.$store.state.orders.orderData
 		},
 
 		lastUpdated() {
@@ -122,5 +126,7 @@ export default {
 
 
 <style>
-
+div.foot {
+	height: 300px;
+}
 </style>

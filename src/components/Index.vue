@@ -195,14 +195,15 @@
 
 
     </v-navigation-drawer>
-
     <v-app-bar
       app
       color="indigo"
       dark
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-toolbar-title>Delivery-App</v-toolbar-title>
+      <v-toolbar-title>Delivery-App,</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <div id="containernd" v-if="isAuthenticated"><node-selector/></div>
     </v-app-bar>
 
     <v-content>
@@ -222,10 +223,11 @@
 
             <v-tooltip right>
               <template v-slot:activator="{ on }">
-               
+               <v-app>
                 <keep-alive>
                   <router-view></router-view>
                 </keep-alive>
+              </v-app>
 
               </template>
               <span>Codepen</span>
@@ -247,6 +249,7 @@
 </template>
 
 <script>
+import NodeSelector from "@/components/NodeSelector.vue"
 export default {
   name: 'Index',
 
@@ -278,8 +281,6 @@ export default {
 
   methods: {
     logout() {
-      console.log('logout')
-      this.$router.push('home')
       this.$store.commit('auth/removeAllCreds')
     }
   },
@@ -291,6 +292,10 @@ export default {
       return null
     }
   },
+
+  components:{
+    NodeSelector
+  }
 };
 </script>
 
@@ -299,5 +304,12 @@ export default {
 <style>
 a {
   text-decoration: none;
+}
+
+div#containernd {
+  display: flex;
+  justify-content: center;
+  padding-top: 20px;
+  color: blue;
 }
 </style>

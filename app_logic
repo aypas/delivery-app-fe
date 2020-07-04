@@ -1,0 +1,10 @@
+auth:
+jwt data will be kept in cookies, upon succesful login, request will be sent to api/auth/user for user data which will also be kept in cookies
+user data contains name, perms and node(s) to which the user belongs
+
+application core:
+view permissions depend on permissions of api/auth/user response
+app will set one node's pk as main
+all subsequent requests for orders, partners and users will be with with the main pk
+
+hence, nodes should be kept in cookies as well...

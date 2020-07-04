@@ -46,6 +46,12 @@ const routes = [
   },
 
   {
+    path: '/partners',
+    name: 'partners',
+    component: () => import('../views/Partners.vue')
+  },
+
+  {
     path: '/callback',
     name: 'callback',
     component: () => import('../views/redirect.vue')
@@ -69,18 +75,13 @@ router.beforeEach((to, from, next) => {
   if (auth == null && !["signin", "about", "home", "signup"].includes(to.name)) {
     console.log('sdfsdf44')
     next('/signin')
-  } else if (auth == null && ["signin", "about", "home", "signup"].includes(to.name)){
-    next()
-  } else {
-      if (!auth.isAuthenticated && !["signin", "about", "home", "signup"].includes(to.name)) {
-        next('/signin')
-      } else if (auth.isAuthenticated && to.name == 'signin'){
-        console.log('i should see this')
-        next('/dashboard')
-      } else {
-        next()
-      }
+  } else if ( !(auth==null) && to.name=="signin") {
+    console.log(from, "naaaam")
+    next('/dashboard')
+  } else if ( ["node", "callback", "partners"].includes(to.name) && (!auth.authUser.is_node_owner || !auth.authUser.is_manager) ) {
+    next('/dashboard')
   }
+  next()
 })
 
 export default router

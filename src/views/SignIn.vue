@@ -13,6 +13,7 @@
 	              outlined
 	        ></v-text-field>
 	  			<v-text-field
+	  				v-on:keyup.enter="post"
 	  				v-model="json.password"
 	        	label="Password"
 	        	outlined
@@ -22,8 +23,7 @@
 							<div>
 				<p class="caption">Forgot My Password</p>
 				<p class="caption" v-if="err==400">You left one of the two fields empty</p>
-				<p class="caption" v-else-if="err!=400 && !loginFail">.</p>
-				<p class="caption" v-else-if="loginFail">{{loginFail}}</p>
+				<p class="caption" v-else-if="loginFail">{{loginFail}} f</p>
 				</div>
 				<v-btn x-large rounded ripple elevation="4" color="indigo" class="white--text" @click="post">Sign In</v-btn>
 			</v-container>
@@ -53,7 +53,7 @@ export default {
 
 	computed: {
 		loginFail() {
-			return this.$store.state.auth.loginErr
+			return this.$store.state.auth.authErr
 		}
 	},
 

@@ -29,6 +29,7 @@ export default {
 			if (this.$store.state.auth.jwt){
 				return this.$store.state.auth.jwt.slice(-10)
 			}
+			console.log(this.$store.state.auth.oauthMsg)
 			return null
 		},
 
