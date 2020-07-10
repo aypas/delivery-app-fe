@@ -25,7 +25,10 @@
 				<p class="caption" v-if="err==400">You left one of the two fields empty</p>
 				<p class="caption" v-else-if="loginFail">{{loginFail}} f</p>
 				</div>
-				<v-btn x-large rounded ripple elevation="4" color="indigo" class="white--text" @click="post">Sign In</v-btn>
+				<v-btn v-if="!loading" :width="100" x-large rounded ripple elevation="4" color="indigo" class="white--text" @click="post">Sign In</v-btn>
+				<v-btn v-else x-large rounded ripple elevation="4" color="indigo" :width="100">
+					<v-progress-circular color="white" :indeterminate="true" :value="80"></v-progress-circular>
+				</v-btn>
 			</v-container>
 		</div>	
 	</v-app>
@@ -54,6 +57,10 @@ export default {
 	computed: {
 		loginFail() {
 			return this.$store.state.auth.authErr
+		},
+
+		loading() {
+			return this.$store.state.auth.loading
 		}
 	},
 
@@ -74,6 +81,8 @@ export default {
 			} else if (!this.validateEmail(this.json.email)){
 				this.err = 400
 				return true
+			} else {
+				this.err = null
 			}
 		},
 

@@ -207,6 +207,14 @@
     </v-app-bar>
 
     <v-content>
+      <v-alert
+        color="red lighten-1"
+        :dismissible="true"
+        :prominent="true"
+        v-if="serverError"
+        >
+        {{serverError}}
+      </v-alert>
       <v-container
         class="fill-height"
         fluid
@@ -222,8 +230,10 @@
             </v-tooltip>
 
             <v-tooltip right>
+              
               <template v-slot:activator="{ on }">
                <v-app>
+
                 <keep-alive>
                   <router-view></router-view>
                 </keep-alive>
@@ -262,7 +272,8 @@ export default {
               ['Completed', 'mdi-check']
             ],
     earnings: [['Daily', 'mdi-calendar-today'], ['Custom Period', 'mdi-calendar-month-outline']],
-    manActions: [{text: 'Settings', icon: '', link: '/settings'}, {text:'Node',icon:'', link:'/node'}]
+    manActions: [{text:'Node',icon:'mdi-set-left-center', link:'/node'},
+                 {text: 'Partners', icon: 'mdi-handshake', link: '/partners'}]
   }),
   
   computed: {  
@@ -276,6 +287,10 @@ export default {
 
     authUser() {
       return this.$store.state.auth;
+    },
+
+    serverError() {
+      return this.$store.state.errors.message
     }
   },
 

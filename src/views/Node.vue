@@ -1,7 +1,8 @@
 <template>
 	<v-container fluid>
-	<v-container fluid v-if="nodeData!=null">
-	<v-form >
+		{{loading}}
+	<v-container fluid v-if="!loading">
+	<v-form v-if="nodeData!=null" >
 		<p>Node Information</p>
 			<v-container>
 				<v-row :justify="'space-around'">
@@ -250,6 +251,10 @@ export default {
 
 		permissions() {
 			return [this.$store.state.auth.authUser.is_node_owner, this.$store.state.auth.authUser.is_manager]
+		},
+
+		loading() {
+			return this.$store.state.node.loading;
 		}
 	},
 

@@ -13,13 +13,18 @@ axios.defaults.headers.common['Content-Type'] = "application/json";
 //also, i gotta add a bunch of code to all catches to handle timeout errs
 export const axiosIns = axios.create({
   baseURL: "http://127.0.0.1:8000",
-  timeout: 1750
+  timeout: 3000
 });
 
 axiosIns.interceptors.response.use(function (response) {
     return response;
   }, function (error) {
-    console.log(error.response, 'django sent an err')
+    if (error.response == undefined) {
+      console.log("django sent an err")
+      store.commit('errors/setErr', true)
+      return Promise.reject(error)
+      }
+    store.commit('errors/setErr', false)
     if (error.response.status==401 && store.state.auth.refreshToken) {
       console.log('request to refresh has been sent...')
       axiosIns.post('api/auth/token/refresh/', {refresh: store.state.auth.refreshToken})
@@ -28,16 +33,15 @@ axiosIns.interceptors.response.use(function (response) {
           store.commit('auth/refresh', response.data);
           return true;
       }).catch( (error) => { //errors should redirect to dashboard, and displayed to the use!
-          if (error.response==="undefined"){
-            router.push('home?q=unknown-error');
-          }
           if (error.response.status==401){
             store.commit('auth/removeAllCreds');
             console.log('if navigation guard doesnt fail here it might be good in general!!!')
             router.push('/?q=SesionExpired');
           }
           return false;
-      })
+        })
+    } else if (error.response.status==400) {
+      console.log(error.response.status, error.response.data, 'status and detail')
     }
     return Promise.reject(error);
   });

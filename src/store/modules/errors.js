@@ -1,31 +1,26 @@
-const store = {
-  err: 0,
-  msg: '',
+const state = {
+  message: '',
 }
 
-const getters = {
-  getErr(state) {
-    return state.err;
-  },
 
-  getMsg(state) {
-    return state.msg;
-  }
-}
+const getters = {}
 
 const mutations = {
-  mutErr(state, status) {
-    state.err = status;
-    if (status >=400 && status<=499){
-      state.msg = 'Permission error. Are you sure you\'re where you\'re supposed to be?';
-    } else if (status >= 500 && status<=599) {
-      state.msg = 'Server side issue. Please give our machines a few minutes before you place another request!';
+  setErr(state, set) {
+    if (set) {
+      state.message = "Are you sure you're connected to the internet? If so this might be a server side error.";
+    } else {
+      state.message = "";
     }
   }
 }
 
-export default {
-  store,
+const actions = {}
+
+export const errors = {
+  namespaced: true,
+  state,
   getters,
-  mutations
+  mutations,
+  actions
 }

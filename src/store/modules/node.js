@@ -2,33 +2,43 @@ import { axiosIns } from "@/plugins/Axios"
 
 const state = {
 	nodeData: null,
-	nodeError: null
+	nodeError: null,
+	loading: false
 }
 
 
 const mutations = {
 	setNode(state, data) {
+		console.log('hello')
 		state.nodeData = data;
 	},
 
 	setError(state, data) {
 		console.log(data, 'this is supposed to be an error?')
 		state.nodeError = {status: data.status, "error": data.data.detail};
+	},
+
+	setLoading(state) {
+		state.loading = !state.loading
 	}
 }
 
 
 const actions = {
 	getNode({commit}, id) {
+		commit('setLoading')
 		axiosIns.get(`api/core/node/${id}/`)
 			.then( (response) => {
 				console.log(response.data)
+				commit('setLoading')
 				commit('setNode', response.data)
 			})
 			.catch( (error) => {
 				console.log(error, 'why?')
+				commit('setLoading')
 				commit('setError', error.response.data)
 			})
+
 	},
 
 	putNode({commit}, {data, id}) {

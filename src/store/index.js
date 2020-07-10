@@ -4,6 +4,7 @@ import { auth } from './modules/authentication';
 import { orders } from './modules/orders';
 import { node } from './modules/node';
 import { partners } from './modules/partners';
+import { errors } from './modules/errors';
 
 Vue.use(Vuex)
 
@@ -22,7 +23,8 @@ export const store = new Vuex.Store({
     auth: auth,
     orders: orders,
     node: node,
-    partners: partners
+    partners: partners,
+    errors: errors
   }
 })
 

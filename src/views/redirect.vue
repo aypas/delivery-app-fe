@@ -1,5 +1,5 @@
 <template>
-	<div></div>
+	<div>><v-progress-circular indeterminate :size="150" color="indigo"></v-progress-circular></div>
 </template>
 
 <script>

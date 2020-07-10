@@ -21,7 +21,8 @@ const initialState = {
   jwt: '',
   refreshToken: '',
   authErr: '',
-  oauthMsg: ''
+  oauthMsg: '',
+  loading: false
 }
 
 const state = Object.assign({}, initialState)
@@ -126,21 +127,31 @@ const mutations = {
 
     setMainNode(state, mainNode) {
       state.mainNode = mainNode;
+    },
+
+    setLoading(state) {
+      state.loading = !state.loading
     }
   }
   
 const actions = {
 
   login({commit}, payload) {
+    commit('setLoading')
     axiosIns.post('/api/auth/token/', {email: payload.email, password: payload.password})
       .then( (response) => {
         commit('addTokens', {token:response.data});
         return true;
       }).catch( (err) => {
-        commit('authErr', {err: err.response.data.detail})
-        console.log(err)
-        return false
+        try {
+          commit('authErr', {err: err.response.data.detail})
+          console.log(err)
+          return false
+        } catch { 
+          return false 
+        }
       }).then( (obj) => {
+        console.log('does it get here?')
         if (obj) {
           axiosIns.get('api/auth/user/')
             .then( (response) => {
@@ -150,7 +161,12 @@ const actions = {
             .catch( (err) => {
               console.log(err, 'big error')
               commit('authErr', {deleteErr: true})
-            })       
+            }).
+            then( () => {
+              commit('setLoading')
+            })
+        } else {
+          commit('setLoading')
         }
       })
   },
@@ -171,9 +187,10 @@ const actions = {
         if (!data) {
           console.log('didnt work')
         } else {
-          axiosIns.post('api/auth/token/', {email: data.email, password: data.password})
+          axiosIns.post('api/auth/token/', {email: payload.email, password: payload.password})
             .then( (response) => {
               commit('addTokens', {token: response.data})
+              router.push('/dashboard')
             }).catch((err) => {
               console.log('bad fucking fail m8', err)
             })
@@ -188,9 +205,8 @@ const actions = {
       })
   },
 
-  getAccess({commit},{path}) {
-    console.log(commit, path, 'kakaakakaka')
-    axiosIns.get('api/auth/callback/'+path)
+  getAccess({commit},{queryString}) {
+    axiosIns.get(`api/auth/callback/'${queryString}`)
       .then( response => {
         if (response.status == 200){
           commit('auth/oauth', true)
@@ -207,7 +223,6 @@ const actions = {
         router.push('/node')
       })
   }
-
 }
 
 export const auth = {
