@@ -8,8 +8,13 @@
 				xs="12"
 				md="5">
 				<v-card :height="500">
+					<v-card-actions>
+						<v-row>
+							<v-col><v-select :items="filterSelects" v-model="filterSelect"></v-select></v-col>
+						</v-row>
+					</v-card-actions>
 					<v-simple-table
-						:height="500"
+						:height="300"
 						fixed-header
 					>
 						<template v-slot:default>
@@ -124,6 +129,12 @@ export default {
 	data() {
 		return {
 			partner: {},
+			filterSelects: [
+				{text: "active", value: "active"},
+				{text: "inactive", value: "inactive"},
+				{text: "all", value: "all"}
+			],
+			filterSelect: "active",
 			selectedIndex: 0,
 			string: "Enter as a list of names seperated by three dashes; eg. name-1---name-2",
 			err: null,
@@ -134,73 +145,79 @@ export default {
 
 	computed: {
 		partners() {
+			if (this.filterSelect == "active") {
+				return this.$store.getters['partners/activePartners'];
+			} else if (this.filterSelect == "inactive") {
+				return this.$store.getters['partners/inactivePartners'];
+			}
 			return this.$store.state.partners.partners;
 		},
 
-		// partners() {
-		// 	return this.$store.getters['partners/getPartners']
-		// }
-
 		loadingGet() {
 			return this.$store.state.partners.loadingGet;
+		},
+
+		permissions() {
+			return this.$store.getters['auth/getPermissions'];
 		}
 	},
 
 	methods: {
 		view(partner, i) {
-			this.partner = Object.assign({}, partner)
-			this.selectedIndex = i
+			this.partner = Object.assign({}, partner);
+			this.selectedIndex = i;
 			if (i == this.partners.length) {
-				this.render = 'new'
+				this.render = 'new';
 			} else {
-				this.render = 'update'
+				this.render = 'update';
 			}
 		},
 
 		parseOtherNames(string) {
 			if (typeof string != "object") {
-				return string.split("---")
+				return string.split("---");
 			}
 		},
 
 		updatePartner() {
 			if (this.partner['name'].length == 0 || this.partner["street_address"].length == 0) {
-				this.err = "name and address are required"
-				return null
+				this.err = "name and address are required";
+				return null;
 			} 
 			let list;
 			if (this.partner['other_names']) {
-				list = this.parseOtherNames(this.partner['other_names'])
+				list = this.parseOtherNames(this.partner['other_names']);
 			} else { 
-				list = []
+				list = [];
 			}
 			let data = Object.assign({}, {name: this.partner.name, 
 																		street_address: this.partner.street_address, 
 																		other_names: list,
-																		id: this.partner.id})
+																		id: this.partner.id});
 			this.$store.dispatch('partners/putPartner', {payload: data, index: this.selectedIndex});
 		},
 
 		postPartner() {
 			console.log(this.partner['name'], this.partner['street_address'], 'cheek')
 			if (this.partner['name'] == undefined || this.partner["street_address"] == undefined) {
-				this.err = "name and address are required"
-				return null
+				this.err = "name and address are required";
+				return null;
 			} 
 			console.log(typeof this.partner['other_names'])
 			let list;
 			if (this.partner['other_names']) {
-				list = this.parseOtherNames(this.partner['other_names'])
+				list = this.parseOtherNames(this.partner['other_names']);
 			} else { 
-				list = []
+				list = [];
 			}
 			let data = Object.assign({}, {name: this.partner.name, street_address: this.partner.street_address, other_names: list})
-			this.$store.dispatch("partners/postPartner", {payload: data, id: this.$store.getters['auth/selectedNodeOrDefault'].id})
-				.then(() => { this.render="update" })
+			this.$store.dispatch("partners/postPartner", 
+													 {payload: data, id: this.$store.getters['auth/selectedNodeOrDefault'].id})
+				.then(() => { this.render="update" });
 		},
 
 		deletePartner(index, action) {
-			this.$store.dispatch("partners/deletePartner", {id: this.partners[index].id, index, action})
+			this.$store.dispatch("partners/deletePartner", {id: this.partners[index].id, index, action});
 		}
 	},
 
@@ -210,12 +227,12 @@ export default {
 			if (this.partner.other_names != null && typeof this.partner.other_names == "object") {
 				for (let i = 0; i < this.partner.other_names.length; i++) {
 					if (i == 0) {
-						string = this.partner.other_names[i]
+						string = this.partner.other_names[i];
 					} else {
-						string = string+"---"+this.partner.other_names[i]
+						string = string+"---"+this.partner.other_names[i];
 					}
 				}
-				this.partner.other_names = string
+				this.partner.other_names = string;
 			}
 		}
 	},

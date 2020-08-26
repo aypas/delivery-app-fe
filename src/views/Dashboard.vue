@@ -1,26 +1,37 @@
 <template>
 	<v-app>
+			
+			<keep-alive>
+			<component 
+				v-if="component=='orders'"
+				v-bind:is="'Orders'"
+				v-on:change-view="handleEvent($event)"
+				:parent-data="component == 'viewOrder' ? props : null"
+				>	
+			</component>
+			</keep-alive>
 
-		<component v-bind:is=" msg ? 'orders' : 'null'"></component>
-	
+			<component 
+				v-if="component=='viewOrder'"
+				v-bind:is="'ViewOrder'"
+				v-on:change-view="handleEvent($event)"
+				:parent-data="props"
+				>	
+			</component>
 	</v-app>
 </template>
 
 
 <script>
-import { axiosIns } from "@/plugins/Axios"
 import Orders from "@/components/Orders"
+import ViewOrder from "@/components/ViewOrder"
 
 
 export default {
-//idea is to create a literal dashboard in here, where several components can be combined
-//into one view, that is made custom by the user...i.e, the quick menu will offer those components
-//as their own views, but in dashboard, those components can be combined into one custom page...
-//a whole combination of carousels and shit can be used for this
 	data(){
 		return {
-			msg: 'dash',
-			//r: this.$store.state.jwt
+			component: 'orders',
+			props: null
 		}
 	},
 
@@ -39,19 +50,20 @@ export default {
 	},
 
 	methods: {
-		check() {
-			console.log(this.r)
-			axiosIns.get('api/auth/users/')
-				.then((response) => {
-					console.log(response)
-				}).catch( (err) => {
-					console.log(err.response, 'und')
-				})
+		handleEvent(event) {
+			console.log(event)
+			this.component = event[0]
+			this.props = event[1]
+		},
+
+		test() {
+			this.$store.dispatch('orders/test')
 		}
 	},
 
 	components: {
-		Orders
+		Orders,
+		ViewOrder
 	}
 }
 </script>

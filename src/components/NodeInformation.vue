@@ -1,8 +1,8 @@
 <template>
-	<v-container fluid>
-		{{permissions}}
-	<v-container fluid v-if="!loading">
-	<v-form v-if="nodeData!=null" >
+	<v-container>
+		{{permissions == null}}
+	<v-card>
+	<v-form class="pt-3" v-if="nodeData!=null && permissions != null" >
 		<p>Node Information</p>
 			<v-container>
 				<v-row :justify="'space-around'">
@@ -12,7 +12,7 @@
 					<v-text-field
 					v-model="nodeData.name"
 					:label="'Business Name'"
-					:readonly="!permissions[0]"
+					:readonly="!permissions.owner"
 					>
 					</v-text-field>
 					</v-row>
@@ -23,7 +23,7 @@
 					<v-text-field
 					v-model="nodeData.address"
 					:label="'Address'"
-					:readonly="!permissions[0]"
+					:readonly="!permissions.owner"
 					>
 					</v-text-field>
 					</v-row>
@@ -37,7 +37,7 @@
 					<v-text-field
 					v-model="nodeData.code"
 					:label="'Verification Code'"
-					:readonly="!permissions[0]"
+					:readonly="!permissions.owner"
 					hint="Keep this a secret, share it only with people you intend to work with"
 					persistent-hint
 					>
@@ -79,7 +79,7 @@
 
 				</v-row>
 
-				<v-row v-if="permissions[0]" :justify="'space-around'">
+				<v-row v-if="permissions.owner" :justify="'space-around'">
 					<v-col cols="1">
 						<v-row><v-btn :color="'indigo'" class="white--text" @click="updateNode">Update</v-btn></v-row>
 					</v-col>
@@ -87,10 +87,16 @@
 
 				<v-divider></v-divider>
 
-				<v-row :justify="'space-around'">
-
-					<v-col cols="7">
-						<p>New Node Form</p>
+				<v-col>
+					<v-row justify="end">
+						<v-col cols="4"><p>Users of Your Business</p></v-col>
+						<v-col cols="4">
+							<v-btn @click="emitEvent"><v-icon>mdi-account-edit</v-icon>edit</v-btn>
+						</v-col>
+					</v-row>
+					<v-row justify="center">
+					<v-col cols="9">
+						
 						<v-container>
 							<v-select 
 								:items="selects" 
@@ -111,7 +117,7 @@
 										<td class="text-left">Name</td>
 										<td class="text-left">Email</td>
 										<td 
-											v-if="permissions[0] && selected!='co_owners'" 
+											v-if="permissions.owner && selected!='co_owners'" 
 											class="text-left"
 										>Action</td>
 									</tr>
@@ -121,7 +127,7 @@
 										<td class="text-left">{{v.name}}</td>
 										<td class="text-left">{{v.email}}</td>
 										<td 
-											v-if="permissions[0] && selected!='co_owners'" 
+											v-if="permissions.owner && selected!='co_owners'" 
 											class="text-left"
 										>
 											<v-btn :x-small="true" :color="'red'" class="indigo white--text">Remove</v-btn>
@@ -136,10 +142,11 @@
 						</v-card>
 						</v-container>
 					</v-col>
-				</v-row>
+					</v-row>
+				</v-col>
 
 			</v-container>
-			<v-container v-if="permissions[0]">
+			<v-container v-if="permissions.manager">
 				<v-divider></v-divider>
 				<div class="mt-5">
 				<v-btn
@@ -156,134 +163,43 @@
 			</v-container>
 		
 	</v-form>
-
-		<v-form v-if="permissions[0]">
-			<v-container>
-				<p>User Information</p>
-				<v-row :justify="'space-around'">
-					
-					<v-col cols="4">
-						<v-row>
-							<v-text-field
-								v-model="node.name"
-								:label="'Name'"
-							></v-text-field>
-						</v-row>
-					</v-col>
-
-					<v-col cols="4">
-						<v-row>
-							<v-text-field
-								v-model="node.email"
-								:label="'Email'"
-								type="email"
-							>
-								
-							</v-text-field>
-						</v-row>
-					</v-col>
-				</v-row>
-
-				<v-row :justify="'space-around'">
-					
-					<v-col cols="4">
-						<v-row>
-							<v-text-field
-								v-model="node.address"
-								:label="'Address'"
-							></v-text-field>
-						</v-row>
-					</v-col>
-
-					<v-col cols="4">
-						<v-row>
-							<v-text-field
-								v-model="node.code"
-								:label="'Code'"
-							>
-								
-							</v-text-field>
-						</v-row>
-					</v-col>
-				</v-row>
-
-				<v-row :justify="'space-around'">
-					<v-col cols="1">
-						<v-row><v-btn :color="'indigo'" class="white--text" @click="createNode">Create Node</v-btn></v-row>
-					</v-col>
-				</v-row>
-			</v-container>
-
-		</v-form>
-		</v-container>
-		<div v-else><v-progress-circular indeterminate :size="150" color="indigo"></v-progress-circular></div>
-	
+	</v-card>
 	</v-container>
 </template>
-
-
 
 <script>
 export default {
 	data() {
 		return {
-			node:{
-				name: '',
-				email:'',
-				address: '',
-				code: ''
-			},
-			hasOauth: true,
 			selects: [['owners', 'co_owners'], ['managers', 'managers'], ['workers','workers']],
 			selected: 'co_owners'
-
 		}
 	},
 
 	computed: {
 		nodeData() {
-			return this.$store.state.node.nodeData;
-		},
-
-		nodeError() {
-			return this.$store.state.node.nodeError;
+			return JSON.parse(JSON.stringify(this.$store.state.node.nodeData));
 		},
 
 		permissions() {
-			//permissions in regards to current data
-			return this.$store.getters['auth/getPermissions'];
-		},
-
-		isNodeOwner() {
-			//has permission to create a node
-			return this.$store.getters['auth/isNodeOwner'];
-		},
-
-		loading() {
-			return this.$store.state.node.loading;
+			console.log(this.$store.getters['auth/getPermissions'])
+			return this.$store.getters['auth/getPermissions']
 		}
 	},
 
 	methods: {
+		emitEvent() {
+			console.log(this.selected)
+			this.$emit('change-view', {selected: this.selected, showComponent: 'users'})
+		},
+
 		oauth() {
-			this.$store.dispatch('auth/oauth');
+			console.log(this.$store.getters['auth/selectedNodeOrDefault'].id)
+			this.$store.dispatch('auth/oauth', {nodeId: this.$store.getters['auth/selectedNodeOrDefault'].id});
 		},
 
 		updateNode() {
-			console.log('stop ', this.$store.state.auth.mainNode.id);
 			this.$store.dispatch('node/putNode', {data:this.nodeData, id: this.$store.state.auth.mainNode.id,});
-		},
-
-		createNode() {
-			this.$store.dispatch('node/postNode', {data: this.node, id: this.$store.state.auth.authUser.id});
-		}
-	},
-
-	beforeCreate() {
-		let id = this.$store.getters['auth/selectedNodeOrDefault'];
-		console.log(id, 'yes this is it')
-		if (id != null) {
-			this.$store.dispatch('node/getNode', id.id);
 		}
 	}
 }

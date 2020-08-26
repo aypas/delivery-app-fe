@@ -104,7 +104,7 @@ export default {
 
 			this.codeRules = [
 				v => !!v || 'A code is required',
-				v => (v >= 100000 && v <= 999999) || 'Invalid Code, must be 6 digits, cannot start with a 0',
+				v => (v.length >= 6) || 'Invalid Code, must be 6 digits, cannot start with a 0',
 			]
 
 			this.passwordRules = [
@@ -114,6 +114,7 @@ export default {
 
 			//console.log(this.$refs.form.validate())
 			let self = this
+			console.log(self.$refs.form)
 			setTimeout( function() {
 				if (self.$refs.form.validate()) {
 					console.log(typeof self.code)

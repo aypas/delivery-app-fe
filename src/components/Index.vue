@@ -237,6 +237,7 @@
                 <keep-alive>
                   <router-view></router-view>
                 </keep-alive>
+                <span v-if="isAuthenticated"><chat></chat></span>
               </v-app>
 
               </template>
@@ -244,22 +245,30 @@
             </v-tooltip>
           </v-col>
         </v-row>
+        <v-footer
+          color="indigo" 
+          app>
+          <span class="white--text">&copy; 2019</span>
+        </v-footer>
       </v-container>
+
     </v-content>
 
 
-
-    <v-footer
+<!--     <v-footer
       color="indigo"
+      absolute 
+      inset 
       app
     >
       <span class="white--text">&copy; 2019</span>
-    </v-footer>
+    </v-footer> -->
   </v-app>
 </template>
 
 <script>
-import NodeSelector from "@/components/NodeSelector.vue"
+import NodeSelector from "@/components/NodeSelector.vue";
+import Chat from "@/components/Chat.vue";
 export default {
   name: 'Index',
 
@@ -290,26 +299,19 @@ export default {
     },
 
     serverError() {
-      return this.$store.state.errors.message
+      return this.$store.state.errors.message;
     }
   },
 
   methods: {
     logout() {
-      this.$store.commit('auth/removeAllCreds')
-    }
-  },
-
-  watch: {
-    //delete this
-    drawer(){
-      console.log(this.$route.path)
-      return null
+      this.$store.commit('auth/removeAllCreds');
     }
   },
 
   components:{
-    NodeSelector
+    NodeSelector,
+    Chat
   }
 };
 </script>

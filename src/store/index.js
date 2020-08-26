@@ -6,7 +6,7 @@ import { node } from './modules/node';
 import { partners } from './modules/partners';
 import { errors } from './modules/errors';
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 const watchState = store => {
   store.subscribe( (mutation, state) => {
@@ -17,7 +17,6 @@ const watchState = store => {
 }
 
 export const store = new Vuex.Store({
-
   plugins: [watchState],
   modules: {
     auth: auth,
@@ -26,7 +25,7 @@ export const store = new Vuex.Store({
     partners: partners,
     errors: errors
   }
-})
+});
 
 
 

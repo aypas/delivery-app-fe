@@ -1,10 +1,14 @@
 import { axiosIns } from "@/plugins/Axios"
 import router from "@/router/index"
 
+function deleteCookies() {
+  document.cookie.split(";").forEach(function(c) { 
+    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+  });
+}
 
 const initialState = {
   authUser: {
-
     id: 0,
     is_active: null,
     email: '',
@@ -16,7 +20,7 @@ const initialState = {
     is_manager: null,
     of_node: []
   },
-  mainNode: null,
+  mainNode: null, //this is a node object, not an index
   isAuthenticated: false,
   jwt: '',
   refreshToken: '',
@@ -25,65 +29,62 @@ const initialState = {
   loading: false
 }
 
-const state = Object.assign({}, initialState)
+const state = Object.assign({}, initialState);
 
 const getters = {
-  //all getters are collected at the root level, and added into state
-  getAuthUser(state) {
-    return state.authUser;
+  //all getters are collected at the root level, and are called as this.$store.getters['auth/...']
+  getPermissions(state) {
+    let index = 0;
+    if (state.mainNode != null) {
+      index = state.authUser.of_node.findIndex((item) => {
+        return item.id == state.mainNode.id
+      })
+    }
+    return {worker: state.authUser.of_node[index].worker,
+            owner: state.authUser.of_node[index].owner,
+            manager: state.authUser.of_node[index].manager};
+  },
+
+  isNodeOwner(state) {
+    return state.authUser.is_node_owner;
   },
 
   getNodes(state){
-    return state.authUser.of_node
+    //used only in nodeselector. idk why probs should get rid
+    return state.authUser.of_node;
   },
 
   selectedNodeOrDefault(state) {
     console.log(state.mainNode, state.authUser.of_node[0], '?')
+    console.log(state.authUser.of_node.length)
     if (state.mainNode == null) {
-      return state.authUser.of_node.length != 0 ? state.authUser.of_node[0] : null
+      return state.authUser.of_node.length != 0 ? state.authUser.of_node[0] : null;
     }
-    return state.mainNode
-  },
-
-  getIsAuthenticated(state) {
-    return state.isAuthenticated;
-  },
-
-  getJWT(state) {
-    return state.jwt;
-  },
-
-  getRefresh(state) {
-    return state.refreshToken;
-  },
+    return state.mainNode;
+  }
 }
 
 const mutations = {
 
-    initializeStore(state){
+    initializeStore(state) {
       console.log('kaka', state)
       if (localStorage.getItem('state')) { 
-        let authObj = JSON.parse(localStorage.getItem('state'))       
-        Object.assign(state, authObj)
+        let authObj = JSON.parse(localStorage.getItem('state'));      
+        Object.assign(state, authObj);
         console.log(state)
         state.isAuthenticated=true;
       }
     },
 
     setAuthUser(state, authUser) {
-      console.log(state, authUser)
-      console.log('pls make true', state.isAuthenticated)
-      state.authUser =  {...authUser};
+      state.authUser =  authUser;
       state.isAuthenticated = true;
-      console.log(!!authUser)
-
-
     },
 
-    addTokens(state, token) {
-      console.log('addTokens..',token.token, state)
-      state.jwt = token.token.access;
-      state.refreshToken = token.token.refresh;
+    addTokens(state, tokens) {
+      console.log(tokens, 'this is token')
+      state.jwt = tokens.access;
+      state.refreshToken = tokens.refresh;
 
     },
 
@@ -101,27 +102,27 @@ const mutations = {
       //localStorage.removeItem('state');
       console.log(state)
       for (let prop in state) {
-        state[prop] = initialState[prop]
+        state[prop] = initialState[prop];
       }
-      
-      localStorage.removeItem('state')
-      router.push('/')
+      deleteCookies();
+      localStorage.removeItem('state');
+      router.push('/');
 
     },
 
     authErr(state, {err, deleteErr}) {
       if (deleteErr) {
-        state.authErr = ""
+        state.authErr = "";
       } else {
-        state.authErr = err
+        state.authErr = err;
       }
     },
 
     oauth(state, status) {
       if (status) {
-        state.oauthMsg = 'You\'ve succesfully linked your google account to our servers!'
+        state.oauthMsg = 'You\'ve succesfully linked your google account to our servers!';
       } else {
-        state.oauthMsg = 'there was a problem'
+        state.oauthMsg = 'there was a problem';
       }
     },
 
@@ -130,44 +131,36 @@ const mutations = {
     },
 
     setLoading(state) {
-      state.loading = !state.loading
+      state.loading = !state.loading;
     }
   }
   
 const actions = {
-
   login({commit}, payload) {
+    let s = performance.now()
     commit('setLoading')
     axiosIns.post('/api/auth/token/', {email: payload.email, password: payload.password})
       .then( (response) => {
-        commit('addTokens', {token:response.data});
+        commit('addTokens', response.data.tokens);
+        commit('setAuthUser', response.data.user);
         return true;
       }).catch( (err) => {
         try {
-          commit('authErr', {err: err.response.data.detail})
-          console.log(err)
-          return false
+          commit('authErr', {err: err.response.data.detail});
+          console.log(err);
+          return false;
         } catch { 
-          return false 
+          return false; 
         }
       }).then( (obj) => {
         console.log('does it get here?')
         if (obj) {
-          axiosIns.get('api/auth/user/')
-            .then( (response) => {
-              commit('setAuthUser', response.data);
-              router.push('/dashboard')
-            })
-            .catch( (err) => {
-              console.log(err, 'big error')
-              commit('authErr', {deleteErr: true})
-            }).
-            then( () => {
-              commit('setLoading')
-            })
+          commit('setLoading');
+          router.push('/dashboard');
         } else {
-          commit('setLoading')
+          commit('setLoading');
         }
+        console.log(performance.now()-s)
       })
   },
 
@@ -176,21 +169,22 @@ const actions = {
     console.log(payload)
     axiosIns.post('/api/auth/signup/', payload)
       .then( (response) => {
-        commit('setAuthUser', response.data)
-        return response.data
+        //THERES NO NEED FOR RESPONSE TO SEND SERIALIZED DATA...DO EVERYTHING WITH /TOKEN tmrw
+        commit('setAuthUser', response.data);
+        return response.data;
       })
       .catch( (err) => {
-        console.log('you done fucked up', err.response.data.detail)
-        commit('authErr', {err:err.response.data.detail})
-        return false
+        console.log('you done fucked up', err.response.data.detail);
+        commit('authErr', {err:err.response.data.detail});
+        return false;
       }).then( (data) => {
         if (!data) {
           console.log('didnt work')
         } else {
           axiosIns.post('api/auth/token/', {email: payload.email, password: payload.password})
             .then( (response) => {
-              commit('addTokens', {token: response.data})
-              router.push('/dashboard')
+              commit('addTokens', response.data.tokens);
+              router.push('/dashboard');
             }).catch((err) => {
               console.log('bad fucking fail m8', err)
             })
@@ -198,29 +192,31 @@ const actions = {
       })
   },
 
-  oauth() {
-    axiosIns.get('api/auth/oauth/')
+  oauth({commit}, {nodeId}) {
+    let _commit = commit;
+    console.log(nodeId)
+    axiosIns.get(`api/auth/oauth/${nodeId}/`)
       .then( response => {
-        window.location.href = response.data.url
+        window.location.href = response.data.url;
       })
   },
 
-  getAccess({commit},{queryString}) {
-    axiosIns.get(`api/auth/callback/'${queryString}`)
+  getAccess({commit},{queryString, nodeId}) {
+    axiosIns.get(`api/auth/callback/${nodeId}/${queryString}`)
       .then( response => {
         if (response.status == 200){
-          commit('auth/oauth', true)
-          return true
+          commit('auth/oauth', true);
+          return true;
         }
         console.log(response.status)
       })
       .catch( err => {
-        commit('auth/oauth', false)
+        commit('auth/oauth', false);
         console.log(err)
       })
       .then( () => {
         console.log('third chain')
-        router.push('/node')
+        router.push('/node');
       })
   }
 }

@@ -21,24 +21,24 @@ export default {
 
 	computed: {
 		nodes(){
-			return this.$store.getters['auth/getNodes']
+			return this.$store.getters['auth/getNodes'];
 		},
 
 		selectedNode() {
-			let t = this.$store.getters['auth/selectedNodeOrDefault']
+			let t = this.$store.getters['auth/selectedNodeOrDefault'];
 			console.log(t.name, 'no pls no')
-			return t
+			return t;
 		}
 	},
 
 	methods: {
 		changeMainNode(obj){
 			console.log(obj)
-			this.$store.commit('auth/setMainNode', obj)
+			this.$store.commit('auth/setMainNode', obj);
 		},
 
 		nodeName(item) {
-			return item.name
+			return item.name;
 		}
 	}
 }
@@ -64,7 +64,6 @@ div#child {
 
 .theme--light.v-list{
   background: white;
-
   color: blue;
 }
 .v-list-item__content{

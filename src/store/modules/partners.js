@@ -7,32 +7,43 @@ const state = {
 }
 
 const getters = {
+
+	activePartners(state){
+		let f = state.partners.filter(item => item.active == true)
+		console.log(f)
+		return f;
+	},
+
+	inactivePartners(state) {
+		return state.partners.filter(item => item.active == false)
+	},
+
 	err(state) {
-		return state.err
+		return state.err;
 	}
 }
 
 const mutations = {
 	setPartners(state, data) {
 		console.log(data)
-		state.partners = data.data
-		state.err = null
+		state.partners = data.data;
+		state.err = null;
 	},
 
 	setErr(state, err) {
 		console.log(err, err.response, state)
-		state.err = err.response.data.detail
+		state.err = err.response.data.detail;
 	},
 
 	putPartner(state, {response, index}) {
 		console.log(response)
 		state.partners[index] = response.data;
-		state.err = null
+		state.err = null;
 	},
 
 	postPartner(state, {response}) {
-		state.partners.push(response.data)
-		state.err = null
+		state.partners.push(response.data);
+		state.err = null;
 	},
 
 	setLoadingGet(state) {
@@ -46,7 +57,7 @@ const mutations = {
 
 const actions = {
 	getPartners({commit}, id) {
-		commit('setLoadingGet')
+		commit('setLoadingGet');
 		axiosIns.get(`api/core/partners/${id}/`)
 			.then( (response) => {
 				console.log(response)
@@ -59,7 +70,9 @@ const actions = {
 					//pass
 				}
 			})
-			.then( () => { commit('setLoadingGet')})
+			.then( () => { 
+				commit('setLoadingGet')
+			});
 	},
 
 	putPartner({commit}, {payload, index}) {
@@ -72,7 +85,7 @@ const actions = {
 			.catch( (err) => {
 				console.log('er')
 				commit('setErr', err)
-			})
+			});
 	},
 
 	postPartner({commit}, {payload, id}) {
@@ -83,7 +96,7 @@ const actions = {
 			.catch( (err) => {
 				console.log(err.response.detail)
 				commit('setErr', err)
-			})
+			});
 	},
 
 	deletePartner({commit}, {id, index, action}) {
@@ -93,14 +106,14 @@ const actions = {
 			})
 			.catch( error => {
 				console.log(error)
-			})
+			});
 	}
 }
 
 export const partners = {
+	namespaced: true,
 	state,
 	getters,
 	mutations,
-	actions,
-	namespaced: true
+	actions
 }

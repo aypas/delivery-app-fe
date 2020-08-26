@@ -46,6 +46,12 @@ const routes = [
   },
 
   {
+    path: '/node1',
+    name: 'node1',
+    component: () => import('../views/Node1.vue')
+  },
+
+  {
     path: '/partners',
     name: 'partners',
     component: () => import('../views/Partners.vue')
@@ -55,14 +61,20 @@ const routes = [
     path: '/callback',
     name: 'callback',
     component: () => import('../views/redirect.vue')
+  },
+
+  {
+    path: '/shitfuck',
+    name: 'shitfuck',
+    component: () => import('../views/ShitFuck.vue')
   }
-]
+];
 
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
-})
+});
 
 
 //i cant access reactive vuex in here
@@ -70,18 +82,18 @@ const router = new VueRouter({
 //but on login it doesnt load fast enough...
 router.beforeEach((to, from, next) => {
 
-  let auth = JSON.parse(localStorage.getItem('state'))
+  let auth = JSON.parse(localStorage.getItem('state'));
   console.log(auth, 'popop')
-  if (auth == null && !["signin", "about", "home", "signup"].includes(to.name)) {
+  if (auth == null && !["signin", "about", "home", "signup", 'shitfuck'].includes(to.name)) {
     console.log('sdfsdf44')
-    next('/signin')
+    next('/signin');
   } else if ( !(auth==null) && to.name=="signin") {
     console.log(from, "naaaam")
-    next('/dashboard')
+    next('/dashboard');
   } else if ( ["node", "callback", "partners"].includes(to.name) && (!auth.authUser.is_node_owner || !auth.authUser.is_manager) ) {
-    next('/dashboard')
+    next('/dashboard');
   }
-  next()
-})
+  next();
+});
 
-export default router
+export default router;

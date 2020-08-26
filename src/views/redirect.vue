@@ -5,7 +5,8 @@
 <script>
 export default {
   beforeCreate() {
-  	this.$store.dispatch('auth/getAccess', {path:window.location.search,})
+  	this.$store.dispatch('auth/getAccess', {queryString:window.location.search,
+  																					nodeId: this.$store.getters['auth/selectedNodeOrDefault'].id})
   }
 }
 </script>
